@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
 });
 
 app.get('/presentation', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'presentation.pdf'));
+    res.sendFile(path.join(__dirname, 'public', 'file.pdf'));
 });
 
 server.listen(3000, () => {
