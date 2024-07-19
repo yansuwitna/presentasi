@@ -64,8 +64,8 @@ app.get('/presentation', (req, res) => {
 });
 
 // Route untuk menyajikan halaman kontrol server
-app.get('/server', (req, res) => {
-    res.sendFile(path.join(PUBLIC_DIR, 'server.html'));
+app.get('/guru', (req, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, 'guru.html'));
 });
 
 // Route untuk menyajikan halaman upload
@@ -82,7 +82,7 @@ app.get('/', (req, res) => {
 app.post('/upload', upload.single('fileUpload'), (req, res) => {
     console.log('File uploaded:', req.file);
     // res.send('File uploaded successfully');
-    res.redirect('/server');
+    res.redirect('/guru');
 });
 
 // Menjalankan server

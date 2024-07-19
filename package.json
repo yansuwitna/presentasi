@@ -1,9 +1,24 @@
 {
+  "name": "presentasi",
+  "version": "1.0.0",
+  "bin": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "express": "^4.19.2",
     "http": "^0.0.1-security",
     "multer": "^1.4.5-lts.1",
-    "socket.io": "^4.7.5",
-    "pdfjs-dist": "^4.3.136"
+    "node-windows": "^1.0.0-beta.8",
+    "pdfjs-dist": "^4.3.136",
+    "socket.io": "^4.7.5"
+  },
+  "pkg": {
+    "targets": [
+      "node14-linux-x64",
+      "node14-win-x64",
+      "node14-macos-x64"
+    ],
+    "output": "build/presentasi"
   }
 }
