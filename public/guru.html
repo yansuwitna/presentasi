@@ -11,7 +11,7 @@
         #pdfViewer {
             width: 100%;
             /* height: 90vh; */
-            border: 2px solid black;
+            border: 5px solid black;
             margin-top: 10px;
             border-radius: 10px;
         }
@@ -36,9 +36,21 @@
         <div class="rowss">
             <div class="col-md-12">
                 <div id="controls" class="text-center">
-                    <button id="prevSlide" class="btn btn-primary">Previous</button>
-                    <a href="upload" class="btn btn-danger">UPLOAD</a>
-                    <button id="nextSlide" class="btn btn-primary">Next</button>
+                    <table width="100%">
+                        <tr>
+                            <td width="1%" nowrap>
+                                <button id="prevSlide" class="btn btn-primary">< Previous</button>
+                            </td>
+                            <td width="100%">
+                                <a href="upload" class="btn btn-danger">Upload</a>
+                                <button class="btn btn-warning" id="siswa">0 Siswa</i></button>
+                            </td>
+                            <td width="1%" nowrap>
+                                <button id="nextSlide" class="btn btn-primary">Next ></button>
+                            </td>
+                        </tr>
+                    </table>
+                    
                 </div>
             </div>
             <div class="col-md-12">
@@ -64,7 +76,7 @@
         function renderPage(num) {
             pdfDoc.getPage(num).then(page => {
                 const viewport = page.getViewport({
-                    scale: 1.5
+                    scale: 5
                 });
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
@@ -88,6 +100,10 @@
         socket.on('slide', index => {
             pageNum = index + 1;
             renderPage(pageNum);
+        });
+
+        socket.on('siswa', jml => {
+            document.getElementById('siswa').innerHTML = (jml-1) + " Siswa";
         });
     </script>
 </body>

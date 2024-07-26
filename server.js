@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const UPLOADS_DIR = path.join(PUBLIC_DIR, 'uploads');
 const PDF_PATH = path.join(UPLOADS_DIR, 'presentation.pdf');
-const PDF_PAGES = 400; // Ganti dengan jumlah halaman PDF yang sebenarnya
+const PDF_PAGES = 4000; // Ganti dengan jumlah halaman PDF yang sebenarnya
 
 // Middleware untuk serve static files di public directory
 app.use(express.static(PUBLIC_DIR));
@@ -30,11 +30,16 @@ const upload = multer({ storage: storage });
 
 // Socket.io connection handling
 let slideIndex = 0;
+let jmlSiswa = 0;
 io.on('connection', (socket) => {
     console.log('Client connected');
+    jmlSiswa++;
 
     // Mengirimkan indeks slide saat ini ke client yang baru terhubung
     socket.emit('slide', slideIndex);
+
+    //Jumlah Siswa
+    io.emit('siswa', jmlSiswa);
 
     // Menangani perintah next slide dari client
     socket.on('next', () => {
@@ -55,6 +60,8 @@ io.on('connection', (socket) => {
     // Menangani saat client disconnect
     socket.on('disconnect', () => {
         console.log('Client disconnected');
+        jmlSiswa--;
+        io.emit('siswa', jmlSiswa);
     });
 });
 
@@ -82,6 +89,7 @@ app.get('/', (req, res) => {
 app.post('/upload', upload.single('fileUpload'), (req, res) => {
     console.log('File uploaded:', req.file);
     // res.send('File uploaded successfully');
+    slideIndex = 0;
     res.redirect('/guru');
 });
 
