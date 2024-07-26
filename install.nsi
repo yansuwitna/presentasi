@@ -5,7 +5,7 @@
 
 ; Tentukan nama aplikasi dan versi
 Name "Presentasi"
-OutFile "Presentasi.exe"
+OutFile "Setup Presentasi PDF.exe"
 InstallDir "C:\Presentasi"
 InstallDirRegKey HKLM "Software\Presentasi" "Install_Dir"
 
@@ -34,6 +34,7 @@ Section "MainSection" SEC01
   SetOutPath "C:\Presentasi"
   File "nodejs-setup32.msi"
   File "nodejs-setup64.msi"
+  File "server.exe"
   File "server.js"
   File "package.json"
   File "presentasi.bat"
@@ -82,16 +83,16 @@ Section "MainSection" SEC01
     ${EndIf}
   
   ; Buat shortcut di desktop
-  CreateShortCut "$DESKTOP\Presentasi.lnk" "C:\Presentasi\presentasi.bat"
+  CreateShortCut "$DESKTOP\Presentasi.lnk" "C:\Presentasi\server.exe"
   CreateShortCut "$DESKTOP\Presentasi Guru.lnk" "http://localhost:3000/guru"
 
   ; Create shortcut in the Start Menu
     CreateDirectory "$SMPROGRAMS\Presentasi"
-    CreateShortcut "$SMPROGRAMS\Presentasi\Server Presentasi.lnk" "C:\Presentasi\presentasi.bat" "" "C:\Presentasi\presentasi.bat" 0
+    CreateShortcut "$SMPROGRAMS\Presentasi\Server Presentasi PDF.lnk" "C:\Presentasi\server.exe" "" "C:\Presentasi\server.exe" 0
     CreateShortCut "$SMPROGRAMS\Presentasi\Presentasi Guru.lnk" "http://localhost:3000/guru"
 
-    WriteUninstaller "C:\Presentasi\uninstall.exe"
-    CreateShortcut "$SMPROGRAMS\Presentasi\Hapus Aplikasi.lnk" "C:\Presentasi\uninstall.exe"
+    WriteUninstaller "C:\Presentasi\Hapus Presentasi PDF.exe"
+    CreateShortcut "$SMPROGRAMS\Presentasi\Hapus Presentasi PDF.lnk" "C:\Presentasi\Hapus Presentasi PDF.exe"
 
 SectionEnd
 
@@ -99,10 +100,10 @@ Section "Uninstall"
     ; Remove shortcuts
     Delete "$DESKTOP\Presentasi.lnk"
     Delete "$DESKTOP\Presentasi Guru.lnk"
-    Delete "$SMPROGRAMS\Presentasi\Server Presentasi.lnk"
-    Delete "$SMPROGRAMS\Presentasi\Presentasi Guru.lnk"
-    RMDir "$SMPROGRAMS\Presentasi"
-    RMDir "$INSTDIR"
+    Delete "$SMPROGRAMS\Presentasi\Server Presentasi PDF.lnk"
+    Delete "$SMPROGRAMS\Presentasi\Hapus Presentasi PDF.lnk"
+    RMDir /r "$SMPROGRAMS\Presentasi"
+    RMDir /r "$INSTDIR"
     ; Finish uninstallation
     MessageBox MB_OK "Uninstallation complete."
 SectionEnd
