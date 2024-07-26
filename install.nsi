@@ -1,5 +1,7 @@
-!include "MUI2.nsh"
-!include "LogicLib.nsh"
+!include LogicLib.nsh
+!include x64.nsh
+!include FileFunc.nsh
+!insertmacro GetParameters
 
 ; Tentukan nama aplikasi dan versi
 Name "Presentasi"
@@ -11,6 +13,18 @@ InstallDirRegKey HKLM "Software\Presentasi" "Install_Dir"
 Page directory
 Page instfiles
 
+Var ARCHITECTURE
+Var NODE_INSTALLED
+
+Function .onInit
+    ; Check system architecture
+    ${If} ${RunningX64}
+        StrCpy $ARCHITECTURE "x64"
+    ${Else}
+        StrCpy $ARCHITECTURE "x86"
+    ${EndIf}
+FunctionEnd
+
 ; Tentukan pengaturan default
 Section "MainSection" SEC01
     CreateDirectory "C:\Presentasi\public"
@@ -18,7 +32,8 @@ Section "MainSection" SEC01
 
   ; Tentukan file yang akan disalin
   SetOutPath "C:\Presentasi"
-  File "nodejs-setup.msi"
+  File "nodejs-setup32.msi"
+  File "nodejs-setup64.msi"
   File "server.js"
   File "package.json"
   File "presentasi.bat"
@@ -32,28 +47,62 @@ Section "MainSection" SEC01
   
   
   ; Instal Node.js
-  ExecWait '"C:\Presentasi\nodejs-setup.msi" /silent'
-  
-  ; Jalankan Node.js untuk memasang modul atau konfigurasi
-  ExecWait '"C:\Presentasi\node.exe" "C:\Presentasi\server.js"'
-  
-  ; Tambahkan layanan Windows
-  WriteRegStr HKLM "Software\Presentasi" "Install_Dir" "C:\Presentasi"
+  nsExec::ExecToStack "cmd /C node -v"
+    Pop $0
+    Pop $1
+
+    ${If} $0 == 0
+        StrCpy $NODE_INSTALLED 1
+    ${Else}
+        StrCpy $NODE_INSTALLED 0
+    ${EndIf}
+
+    ${If} $NODE_INSTALLED == 0
+        ; Node.js not found, download and install it
+        MessageBox MB_OK "Node.js not found. Installing Node.js..."
+        
+        ; Define Node.js version and URL based on architecture
+        ${If} $ARCHITECTURE == "x64"
+            ;StrCpy $0 "node-v14.17.0-x64.msi"
+            ;StrCpy $1 "https://nodejs.org/dist/v14.17.0/$0"
+            StrCpy $0 "nodejs-setup64.msi"
+        ${Else}
+            ;StrCpy $0 "node-v14.17.0-x86.msi"
+            ;StrCpy $1 "https://nodejs.org/dist/v14.17.0/$0"
+            StrCpy $0 "nodejs-setup32.msi"
+        ${EndIf}
+        
+        ; Download Node.js installer
+        ;nsExec::ExecToLog "powershell -command ""& {Invoke-WebRequest -Uri $1 -OutFile $0}"""
+        
+        ; Install Node.js
+        nsExec::ExecToLog "msiexec /i $0 /quiet"
+    ${Else}
+        MessageBox MB_OK "Node.js is already installed."
+    ${EndIf}
   
   ; Buat shortcut di desktop
   CreateShortCut "$DESKTOP\Presentasi.lnk" "C:\Presentasi\presentasi.bat"
+  CreateShortCut "$DESKTOP\Presentasi Guru.lnk" "http://localhost:3000/guru"
+
+  ; Create shortcut in the Start Menu
+    CreateDirectory "$SMPROGRAMS\Presentasi"
+    CreateShortcut "$SMPROGRAMS\Presentasi\Server Presentasi.lnk" "C:\Presentasi\presentasi.bat" "" "C:\Presentasi\presentasi.bat" 0
+    CreateShortCut "$SMPROGRAMS\Presentasi\Presentasi Guru.lnk" "http://localhost:3000/guru"
+
+    WriteUninstaller "C:\Presentasi\uninstall.exe"
+    CreateShortcut "$SMPROGRAMS\Presentasi\Hapus Aplikasi.lnk" "C:\Presentasi\uninstall.exe"
+
 SectionEnd
 
-; Hapus file dan registri saat uninstall
 Section "Uninstall"
-  
-  ; Hapus shortcut
-  Delete "$DESKTOP\Presentasi.lnk"
-  
-  ; Hapus registri
-  DeleteRegKey HKLM "Software\Presentasi"
-  
-  ; Hapus folder instalasi
-  RMDir /r "C:\Presentasi"
-
+    ; Remove shortcuts
+    Delete "$DESKTOP\Presentasi.lnk"
+    Delete "$DESKTOP\Presentasi Guru.lnk"
+    Delete "$SMPROGRAMS\Presentasi\Server Presentasi.lnk"
+    Delete "$SMPROGRAMS\Presentasi\Presentasi Guru.lnk"
+    RMDir "$SMPROGRAMS\Presentasi"
+    RMDir "$INSTDIR"
+    ; Finish uninstallation
+    MessageBox MB_OK "Uninstallation complete."
 SectionEnd
