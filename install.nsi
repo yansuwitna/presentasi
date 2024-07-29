@@ -5,7 +5,7 @@
 
 ; Tentukan nama aplikasi dan versi
 Name "Presentasi"
-OutFile "Setup Presentasi PDF.exe"
+OutFile "Setup Presentasi PDF-MP4.exe"
 InstallDir "C:\Presentasi"
 InstallDirRegKey HKLM "Software\Presentasi" "Install_Dir"
 

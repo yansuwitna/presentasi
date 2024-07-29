@@ -13,6 +13,7 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const UPLOADS_DIR = path.join(PUBLIC_DIR, 'uploads');
 const PDF_PATH = path.join(UPLOADS_DIR, 'presentation.pdf');
 const PDF_PAGES = 4000; // Ganti dengan jumlah halaman PDF yang sebenarnya
+let extFile = '.pdf';
 
 // Middleware untuk serve static files di public directory
 app.use(express.static(PUBLIC_DIR));
@@ -23,7 +24,9 @@ const storage = multer.diskStorage({
         cb(null, UPLOADS_DIR);
     },
     filename: function (req, file, cb) {
-        cb(null, 'presentation.pdf'); // Nama file yang diupload akan disimpan sebagai presentation.pdf
+        const ext = path.extname(file.originalname);
+        extFile = ext;
+        cb(null, 'presentation' + ext); // Nama file yang diupload
     }
 });
 const upload = multer({ storage: storage });
@@ -31,31 +34,39 @@ const upload = multer({ storage: storage });
 // Socket.io connection handling
 let slideIndex = 0;
 let jmlSiswa = 0;
+
 io.on('connection', (socket) => {
     console.log('Client connected');
     jmlSiswa++;
 
-    // Mengirimkan indeks slide saat ini ke client yang baru terhubung
-    socket.emit('slide', slideIndex);
-
     //Jumlah Siswa
     io.emit('siswa', jmlSiswa);
 
-    // Menangani perintah next slide dari client
-    socket.on('next', () => {
-        if (slideIndex < PDF_PAGES - 1) {
-            slideIndex++;
-            io.emit('slide', slideIndex);
-        }
-    });
+    socket.emit('extFile', extFile);
 
-    // Menangani perintah prev slide dari client
-    socket.on('prev', () => {
-        if (slideIndex > 0) {
-            slideIndex--;
-            io.emit('slide', slideIndex);
-        }
-    });
+    if (extFile=='.pdf') {
+        // Mengirimkan indeks slide saat ini ke client yang baru terhubung
+        socket.emit('slide', slideIndex);
+
+        // Menangani perintah next slide dari client
+        socket.on('next', () => {
+            if (slideIndex < PDF_PAGES - 1) {
+                slideIndex++;
+                io.emit('slide', slideIndex);
+            }
+        });
+
+        // Menangani perintah prev slide dari client
+        socket.on('prev', () => {
+            if (slideIndex > 0) {
+                slideIndex--;
+                io.emit('slide', slideIndex);
+            }
+        });
+
+    }else{
+
+    }
 
     // Menangani saat client disconnect
     socket.on('disconnect', () => {
@@ -89,6 +100,7 @@ app.get('/', (req, res) => {
 app.post('/upload', upload.single('fileUpload'), (req, res) => {
     console.log('File uploaded:', req.file);
     // res.send('File uploaded successfully');
+    console.log('Ext File:', extFile);
     slideIndex = 0;
     res.redirect('/guru');
 });
